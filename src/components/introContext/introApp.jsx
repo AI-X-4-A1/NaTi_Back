@@ -3,7 +3,7 @@ import React from "react";
 function IntroApp() {
   return (
     <div>
-      <div className="title">형석이 형석이14 소개</div>
+      <div className="title">형석이 형석이15 소개</div>
       <div className="context">
         <ul>
           <li>
