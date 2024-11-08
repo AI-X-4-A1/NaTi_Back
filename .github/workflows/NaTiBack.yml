@@ -95,18 +95,14 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Pull Docker image from Docker Hub and run container
+        shell: cmd
         run: |
-          $stopContainer = docker stop yaggugifrontapp 2>$null
-          if (-not $?) {
-              Write-Host "Container not running or already stopped"
-          }
+          docker stop yaggugifrontapp 2>NUL || echo "Container not running or already stopped"
 
-          $removeContainer = docker rm yaggugifrontapp 2>$null
-          if (-not $?) {
-              Write-Host "Container not found or already removed"
-          }
+          docker rm yaggugifrontapp 2>NUL || echo "Container not found or already removed"
 
           docker pull ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
 
           docker run -d -p 3000:3000 --name yaggugifrontapp ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
+
 
