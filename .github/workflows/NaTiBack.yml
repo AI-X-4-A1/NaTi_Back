@@ -76,9 +76,9 @@ jobs:
           REACT_APP_LLM: ${{ secrets.REACT_APP_LLM }}
           REACT_APP_TTS: ${{ secrets.REACT_APP_TTS }}
         run: |
-          docker build -t yaggugi-front-app --build-arg REACT_APP_LLM=$REACT_APP_LLM --build-arg REACT_APP_TTS=$REACT_APP_TTS .
-          docker tag yaggugi-front-app:latest ${{ secrets.DOCKER_USERNAME }}/yaggugi-front-app:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/yaggugi-front-app:latest
+          docker build -t yaggugifrontapp --build-arg REACT_APP_LLM=$REACT_APP_LLM --build-arg REACT_APP_TTS=$REACT_APP_TTS .
+          docker tag yaggugifrontapp:latest ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
 
   # deploy_local job을 auto_merge_build_deploy 이후에 실행
   deploy_local:
@@ -91,7 +91,7 @@ jobs:
 
       - name: Pull Docker image from Docker Hub and run container
         run: |
-          docker stop yaggugi-front-app || true
-          docker rm yaggugi-front-app || true
-          docker pull ${{ secrets.DOCKER_USERNAME }}/yaggugi-front-app:latest
-          docker run -d -p 3000:3000 --name yaggugi-front-app ${{ secrets.DOCKER_USERNAME }}/yaggugi-front-app:latest
+          docker stop yaggugifrontapp || true
+          docker rm yaggugifrontapp || true
+          docker pull ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
+          docker run -d -p 3000:3000 --name yaggugifrontapp ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
