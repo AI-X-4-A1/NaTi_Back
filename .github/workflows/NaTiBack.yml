@@ -2,7 +2,7 @@ name: Auto Merge, Build, and Deploy to Docker Hub
 
 on:
   schedule:
-    - cron: '50 6 * * *' # 매일 15시 50분 (한국 시간)
+    - cron: '35 4 * * *' # 매일 오후 1시 35분 (한국 시간)
   workflow_dispatch: # 수동 실행 가능
 
 permissions:
