@@ -57,7 +57,7 @@ jobs:
           PR_URL=$(gh pr view dev --json url --jq '.url' || echo "")
           if [ -n "$PR_URL" ]; then
             echo "Merging PR: $PR_URL"
-            gh pr merge "$PR_URL" --squash --auto || echo "Merge failed."
+            gh pr merge "$PR_URL" --auto || echo "Merge failed."
           else
             echo "No PR found for dev to main. Skipping merge."
           fi
@@ -76,12 +76,8 @@ jobs:
           REACT_APP_LLM: ${{ secrets.REACT_APP_LLM }}
           REACT_APP_TTS: ${{ secrets.REACT_APP_TTS }}
         run: |
-
-
           docker build -t yaggugifrontapp --build-arg REACT_APP_LLM=$REACT_APP_LLM --build-arg REACT_APP_TTS=$REACT_APP_TTS .
           docker tag yaggugifrontapp:latest ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
-          
-
           docker push ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
 
   # deploy_local job을 auto_merge_build_deploy 이후에 실행
@@ -97,5 +93,7 @@ jobs:
         run: |
           docker stop yaggugifrontapp || true
           docker rm yaggugifrontapp || true
+          
           docker pull ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
+
           docker run -d -p 3000:3000 --name yaggugifrontapp ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
