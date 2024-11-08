@@ -57,7 +57,7 @@ jobs:
           PR_URL=$(gh pr view dev --json url --jq '.url' || echo "")
           if [ -n "$PR_URL" ]; then
             echo "Merging PR: $PR_URL"
-            gh pr merge "$PR_URL" --squash --delete-branch --auto || echo "Merge failed."
+            gh pr merge "$PR_URL" --squash --auto || echo "Merge failed."
           else
             echo "No PR found for dev to main. Skipping merge."
           fi
@@ -80,11 +80,15 @@ jobs:
           docker tag yaggugi-front-app:latest ${{ secrets.DOCKER_USERNAME }}/yaggugi-front-app:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/yaggugi-front-app:latest
 
-  # 로컬 머신에서 Docker 이미지 가져오기 및 실행
+  # deploy_local job을 auto_merge_build_deploy 이후에 실행
   deploy_local:
     runs-on: self-hosted
-    needs: auto_merge_build_deploy
+    needs: auto_merge_build_deploy  # auto_merge_build_deploy job이 완료된 후 실행
     steps:
+      - name: Log in to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
       - name: Pull Docker image from Docker Hub and run container
         run: |
           docker stop yaggugi-front-app || true
