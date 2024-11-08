@@ -1,4 +1,4 @@
-name: Auto Merge and Deploy
+name: Auto Merge, Build, and Deploy to Docker Hub
 
 on:
   schedule:
@@ -10,7 +10,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  auto_merge_and_deploy:
+  auto_merge_build_deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -62,18 +62,32 @@ jobs:
             echo "No PR found for dev to main. Skipping merge."
           fi
 
-      # Docker 설정
-      - name: Set up Docker
-        uses: docker/setup-buildx-action@v2
+      # Docker 빌드 및 Docker Hub 푸시
+      - name: Log in to Docker Hub
+        if: env.has_new_commits == 'true'
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # Docker 빌드 및 배포
-      - name: Run Docker container
+      - name: Build and push Docker image to Docker Hub
         if: env.has_new_commits == 'true'
         env:
           REACT_APP_LLM: ${{ secrets.REACT_APP_LLM }}
           REACT_APP_TTS: ${{ secrets.REACT_APP_TTS }}
         run: |
+          docker build -t yaggugi-front-app --build-arg REACT_APP_LLM=$REACT_APP_LLM --build-arg REACT_APP_TTS=$REACT_APP_TTS .
+          docker tag yaggugi-front-app:latest ${{ secrets.DOCKER_USERNAME }}/yaggugi-front-app:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/yaggugi-front-app:latest
+
+  # 로컬 머신에서 Docker 이미지 가져오기 및 실행
+  deploy_local:
+    runs-on: self-hosted
+    needs: auto_merge_build_deploy
+    steps:
+      - name: Pull Docker image from Docker Hub and run container
+        run: |
           docker stop yaggugi-front-app || true
           docker rm yaggugi-front-app || true
-          docker build -t yaggugi-front-app --build-arg REACT_APP_LLM=$REACT_APP_LLM --build-arg REACT_APP_TTS=$REACT_APP_TTS .
-          docker run -d -p 3000:3000 --name yaggugi-front-app yaggugi-front-app
+          docker pull ${{ secrets.DOCKER_USERNAME }}/yaggugi-front-app:latest
+          docker run -d -p 3000:3000 --name yaggugi-front-app ${{ secrets.DOCKER_USERNAME }}/yaggugi-front-app:latest
