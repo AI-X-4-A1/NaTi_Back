@@ -76,10 +76,16 @@ jobs:
           REACT_APP_LLM: ${{ secrets.REACT_APP_LLM }}
           REACT_APP_TTS: ${{ secrets.REACT_APP_TTS }}
         run: |
+<<<<<<<<< Temporary merge branch 1
+          docker build -t yaggugifrontapp --build-arg REACT_APP_LLM=$REACT_APP_LLM --build-arg REACT_APP_TTS=$REACT_APP_TTS .
+          docker tag yaggugifrontapp:latest ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
+=========
 
           docker build -t yaggugifrontapp --build-arg REACT_APP_LLM=$REACT_APP_LLM --build-arg REACT_APP_TTS=$REACT_APP_TTS .
           docker tag yaggugifrontapp:latest ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
           
+  
+>>>>>>>>> Temporary merge branch 2
           docker push ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
 
   # deploy_local job을 auto_merge_build_deploy 이후에 실행
@@ -96,5 +102,14 @@ jobs:
           docker stop yaggugifrontapp || true
           docker rm yaggugifrontapp || true
           docker pull ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
-
+=========
+   
+          docker stop yaggugifrontapp || true
+          docker rm yaggugifrontapp || true
+          
+ 
+          docker pull ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
+          
+   
+>>>>>>>>> Temporary merge branch 2
           docker run -d -p 3000:3000 --name yaggugifrontapp ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
