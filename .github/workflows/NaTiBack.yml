@@ -107,12 +107,14 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Remove existing Docker container and image
+        shell: cmd
         run: |
-          docker stop yaggugifrontapp || echo "Container not running or already stopped"
-          docker rm yaggugifrontapp || echo "Container not found or already removed"
-          docker rmi ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:dev || echo "Image not found or already removed"
+          docker stop yaggugifrontapp 2>NUL || echo "Container not running or already stopped"
+          docker rm yaggugifrontapp 2>NUL || echo "Container not found or already removed"
+          docker rmi ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest 2>NUL || echo "Image not found or already removed"
 
       - name: Pull Docker image from Docker Hub and run container
+        shell: cmd
         run: |
-          docker pull ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:dev
-          docker run -d -p 3000:3000 --name yaggugifrontapp ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:dev
+          docker pull ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
+          docker run -d -p 3000:3000 --name yaggugifrontapp ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
