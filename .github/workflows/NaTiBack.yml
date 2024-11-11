@@ -24,7 +24,8 @@ jobs:
         run: |
           git config --global user.email "ppuding3861@gmail.com"
           git config --global user.name "ppudding3861"
-      # feat/* 또는 새로 생긴 브랜치에서 dev 브랜치에 새 커밋이 있는지 확인
+      
+      # feat/* 브랜치에서 dev 브랜치에 새 커밋이 있는지 확인
       - name: Check for new commits in feat/* branches
         id: check_commits
         run: |
@@ -39,31 +40,44 @@ jobs:
             echo "has_new_commits=true" >> $GITHUB_ENV
           fi
 
-      # feat/* 브랜치의 변경 사항을 dev 브랜치로 PR 생성 또는 기존 PR 확인 후 병합
-      - name: Create or Find PR from feat/* to dev
+      # 각 feat/* 브랜치의 변경 사항을 dev 브랜치로 PR 생성 또는 기존 PR 확인 후 병합
+      - name: Create or Find PRs from feat/* branches to dev
         if: env.has_new_commits == 'true'
         env:
           GH_TOKEN: ${{ secrets.PPUDDING2 }}
         run: |
-          echo "Attempting to create or find PR from feat/* branches to dev."
-          TARGET_BRANCH=$(git for-each-ref --format '%(refname:short)' refs/remotes/origin/feat/* | head -n 1)
-          PR_URL=$(gh pr list --base dev --head $TARGET_BRANCH --json url --jq '.[0].url' || echo "")
-          if [ -z "$PR_URL" ]; then
-            PR_URL=$(gh pr create --base dev --head "$TARGET_BRANCH" --title "Auto merge $TARGET_BRANCH into dev" --body "자동 생성된 Pull Request" || echo "")
-            echo "PR created: $PR_URL"
-          else
-            echo "Existing PR found: $PR_URL"
-          fi
-          echo "PR_URL=$PR_URL" >> $GITHUB_ENV
+          echo "Attempting to create or find PRs from feat/* branches to dev."
+          git for-each-ref --format '%(refname:short)' refs/remotes/origin/feat/* | while read -r TARGET_BRANCH; do
+            TARGET_BRANCH=${TARGET_BRANCH#origin/} # Remove 'origin/' prefix
+            echo "Processing branch: $TARGET_BRANCH"
+            
+            PR_URL=$(gh pr list --base dev --head "$TARGET_BRANCH" --json url --jq '.[0].url' || echo "")
+            if [ -z "$PR_URL" ]; then
+              PR_URL=$(gh pr create --base dev --head "$TARGET_BRANCH" --title "Auto merge $TARGET_BRANCH into dev" --body "자동 생성된 Pull Request" || echo "")
+              echo "PR created: $PR_URL"
+            else
+              echo "Existing PR found: $PR_URL"
+            fi
+            echo "PR_URL=$PR_URL" >> $GITHUB_ENV
+          done
 
-      # PR 자동 병합 (feat/* 브랜치 유지)
-      - name: Auto-merge pull request
-        if: env.has_new_commits == 'true' && env.PR_URL != ''
+      # 모든 PR 자동 병합 (feat/* 브랜치 유지)
+      - name: Auto-merge pull requests
+        if: env.has_new_commits == 'true'
         env:
           GH_TOKEN: ${{ secrets.PPUDDING2 }}
         run: |
-          echo "Merging PR: $PR_URL"
-          gh pr merge "$PR_URL" --auto || echo "Merge failed."
+          echo "Merging all open PRs from feat/* to dev."
+          git for-each-ref --format '%(refname:short)' refs/remotes/origin/feat/* | while read -r TARGET_BRANCH; do
+            TARGET_BRANCH=${TARGET_BRANCH#origin/} # Remove 'origin/' prefix
+            PR_URL=$(gh pr list --base dev --head "$TARGET_BRANCH" --json url --jq '.[0].url' || echo "")
+            if [ -n "$PR_URL" ]; then
+              echo "Merging PR: $PR_URL"
+              gh pr merge "$PR_URL" --auto || echo "Merge failed for $PR_URL."
+            else
+              echo "No PR found for $TARGET_BRANCH to dev. Skipping merge."
+            fi
+          done
 
       # Docker 빌드 및 Docker Hub 푸시
       - name: Log in to Docker Hub
