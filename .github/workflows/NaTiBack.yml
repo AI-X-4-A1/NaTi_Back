@@ -107,17 +107,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Remove existing Docker container and image
-        shell: pwsh # 파워셸 명시
         run: |
-          if (docker ps -q -f name=yaggugifrontapp) {
-            docker stop yaggugifrontapp
-          }
-          if (docker ps -a -q -f name=yaggugifrontapp) {
-            docker rm yaggugifrontapp
-          }
-          if (docker images -q "${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:dev") {
-            docker rmi "${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:dev"
-          }
+          docker stop yaggugifrontapp || echo "Container not running or already stopped"
+          docker rm yaggugifrontapp || echo "Container not found or already removed"
+          docker rmi ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:dev || echo "Image not found or already removed"
 
       - name: Pull Docker image from Docker Hub and run container
         run: |
