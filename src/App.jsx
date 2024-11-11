@@ -20,12 +20,16 @@ function App() {
     localStorage.setItem("userId", id);
     setUserId(id);
   };
-
+  
+  
+  console.log("hellow")
   useEffect(() => {
     const handleStorageChange = () => {
       setUserId(localStorage.getItem("userId"));
     };
-    
+    for (let i = 0; i < 10; i++) {  // 10번 반복 예시
+      console.log("hellow");
+    }
     window.addEventListener("storage", handleStorageChange);
     return () => {
       window.removeEventListener("storage", handleStorageChange);
