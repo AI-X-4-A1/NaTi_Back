@@ -22,8 +22,8 @@ jobs:
       # Git 설정
       - name: Configure Git
         run: |
-          git config --global user.email "power4206@gmail.com"
-          git config --global user.name "KHY90"
+          git config --global user.email "ppuding3861@gmail.com"
+          git config --global user.name "ppudding3861"
       # feat/* 또는 새로 생긴 브랜치에서 dev 브랜치에 새 커밋이 있는지 확인
       - name: Check for new commits in feat/* branches
         id: check_commits
@@ -42,7 +42,7 @@ jobs:
       - name: Create pull request from feat/* to dev
         if: env.has_new_commits == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PPUDDING2 }}
         run: |
           echo "Attempting to create PR from feat/* branches to dev."
           gh pr create --base dev --head "$(git for-each-ref --format '%(refname:short)' refs/remotes/origin/feat/* | head -n 1)" --title "Auto merge feat/* branches into dev" --body "자동 생성된 Pull Request" || echo "PR already exists."
@@ -50,7 +50,7 @@ jobs:
       - name: Auto-merge pull request
         if: env.has_new_commits == 'true'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PPUDDING2 }}
         run: |
           PR_URL=$(gh pr view dev --json url --jq '.url' || echo "")
           if [ -n "$PR_URL" ]; then
