@@ -4,7 +4,7 @@ function IntroApp() {
   return (
     <div>
 
-      <div className="title">형석이 형석이666 소개</div>
+      <div className="title">형석이 형석이777 소개</div>
 
       <div className="context">
         <ul>
