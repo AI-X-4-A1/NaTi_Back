@@ -2,7 +2,7 @@ name: Auto Merge, Build, and Deploy to Docker Hub
 
 on:
   schedule:
-    - cron: '0 15 * * *' # 매일 자정 00:00 (한국 시간)
+    - cron: '50 5 * * *' # 매일 자정 00:00 (한국 시간, UTC+9 기준)
   workflow_dispatch: # 수동 실행 가능
 
 permissions:
@@ -12,6 +12,7 @@ permissions:
 jobs:
   auto_merge_build_deploy:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/dev' # dev 브랜치에서만 실행
     outputs:
       has_new_commits: ${{ env.has_new_commits }}
 
