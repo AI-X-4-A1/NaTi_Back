@@ -77,7 +77,6 @@ jobs:
               echo "Merging PR: $PR_URL"
               gh pr merge "$PR_URL" --merge || echo "Merge failed for $PR_URL."
               
-              # 병합 완료 상태 확인
               STATUS=""
               until [ "$STATUS" != "" ]; do
                 STATUS=$(gh pr view "$PR_URL" --json mergedAt --jq '.mergedAt' || echo "")
