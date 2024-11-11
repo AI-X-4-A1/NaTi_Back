@@ -1,4 +1,4 @@
-name: Auto Merge, Build, and Deploy to Docker Hub
+name: Auto Merge Feature Branches to Dev, Build, and Deploy to Docker Hub
 
 on:
   schedule:
@@ -10,10 +10,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  auto_merge_build_deploy:
+  auto_merge_feature_to_dev:
     runs-on: ubuntu-latest
-    outputs:
-      has_new_commits: ${{ env.has_new_commits }}
 
     steps:
       - name: Checkout repository
@@ -25,55 +23,53 @@ jobs:
           git config --global user.email "ppuding3861@gmail.com"
           git config --global user.name "ppudding3861"
 
-      # dev 브랜치에 새로운 커밋이 있는지 확인
-      - name: Check for new commits in dev branch
-        id: check_commits
+      # feature/** 브랜치들을 dev로 병합
+      - name: Get list of feature branches
+        id: get_feature_branches
         run: |
-          git fetch origin main
-          git fetch origin dev
-          NEW_COMMITS_COUNT=$(git rev-list origin/main..origin/dev --count)
-          echo "Number of new commits in dev branch: $NEW_COMMITS_COUNT"
-          if [ "$NEW_COMMITS_COUNT" -eq 0 ]; then
-            echo "No new commits in dev branch."
-            echo "has_new_commits=false" >> $GITHUB_ENV
-          else
-            echo "Found new commits in dev branch."
-            echo "has_new_commits=true" >> $GITHUB_ENV
-          fi
+          git fetch --all
+          FEATURE_BRANCHES=$(git branch -r | grep 'origin/feature/' | sed 's|origin/||')
+          echo "Feature branches found: $FEATURE_BRANCHES"
+          echo "feature_branches=$FEATURE_BRANCHES" >> $GITHUB_ENV
 
-      # dev 브랜치의 변경 사항을 main 브랜치로 PR 생성
-      - name: Create pull request from dev to main
-        if: env.has_new_commits == 'true'
-        env:
-          GH_TOKEN: ${{ secrets.PPUDDING2 }}  # 개인 액세스 토큰을 사용하여 더 높은 권한 부여
-        run: |
-          echo "Attempting to create PR from dev to main."
-          gh pr create --base main --head dev --title "Auto merge dev into main" --body "자동 생성된 Pull Request" || echo "PR already exists."
-
-      # PR 자동 병합 (dev 브랜치 유지)
-      - name: Auto-merge pull request
-        if: env.has_new_commits == 'true'
+      # 각 feature/** 브랜치에서 dev로 PR 생성
+      - name: Create pull request from feature branches to dev
+        if: env.feature_branches != ""
         env:
           GH_TOKEN: ${{ secrets.PPUDDING2 }}
         run: |
-          PR_URL=$(gh pr view dev --json url --jq '.url' || echo "")
-          if [ -n "$PR_URL" ]; then
-            echo "Merging PR: $PR_URL"
-            gh pr merge "$PR_URL" --merge --auto || echo "Merge failed."
-          else
-            echo "No PR found for dev to main. Skipping merge."
-          fi
+          for branch in $FEATURE_BRANCHES; do
+            echo "Creating PR from $branch to dev"
+            gh pr create --base dev --head $branch --title "Auto merge $branch into dev" --body "자동 생성된 Pull Request" || echo "PR for $branch already exists."
+          done
 
-      # Docker 빌드 및 Docker Hub 푸시
+      # PR 자동 병합 (dev 브랜치로)
+      - name: Auto-merge pull requests into dev
+        if: env.feature_branches != ""
+        env:
+          GH_TOKEN: ${{ secrets.PPUDDING2 }}
+        run: |
+          for branch in $FEATURE_BRANCHES; do
+            PR_URL=$(gh pr view $branch --json url --jq '.url' || echo "")
+            if [ -n "$PR_URL" ]; then
+              echo "Merging PR: $PR_URL"
+              gh pr merge "$PR_URL" --merge --auto || echo "Merge failed for $branch."
+            else
+              echo "No PR found for $branch to dev. Skipping merge."
+            fi
+          done
+
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    needs: auto_merge_feature_to_dev
+    steps:
       - name: Log in to Docker Hub
-        if: env.has_new_commits == 'true'
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image to Docker Hub
-        if: env.has_new_commits == 'true'
         env:
           REACT_APP_LLM: ${{ secrets.REACT_APP_LLM }}
           REACT_APP_TTS: ${{ secrets.REACT_APP_TTS }}
@@ -81,11 +77,10 @@ jobs:
           docker build -t yaggugifrontapp --build-arg REACT_APP_LLM=$REACT_APP_LLM --build-arg REACT_APP_TTS=$REACT_APP_TTS .
           docker tag yaggugifrontapp:latest ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
           docker push ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
-
+          
   deploy_local:
     runs-on: self-hosted
-    needs: auto_merge_build_deploy
-    if: needs.auto_merge_build_deploy.outputs.has_new_commits == 'true'
+    needs: build_and_deploy
     steps:
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
