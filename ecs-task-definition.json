@@ -1,0 +1,22 @@
+{
+    "family": "narrativa1",
+    "networkMode": "awsvpc",
+    "containerDefinitions": [
+      {
+        "name": "yaggugi",
+        "image": "AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/narrativa1:latest",
+        "essential": true,
+        "portMappings": [
+          {
+            "containerPort": 3000,
+            "hostPort": 3000
+          }
+        ]
+      }
+    ],
+    "requiresCompatibilities": ["FARGATE"],
+    "cpu": "256",
+    "memory": "512",
+    "executionRoleArn": "ecsTaskExecutionRole"
+  }
+  
