@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '0 15 * * *' # 매일 자정 00:00 (한국 시간)
   workflow_dispatch: # 수동 실행 가능
+  push:
+    branches:
+      - dev # dev 브랜치에 푸시될 때 트리거
 
 permissions:
   contents: write
@@ -62,6 +65,7 @@ jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
     needs: auto_merge_feature_to_dev
+    if: github.ref == 'refs/heads/dev' # dev 브랜치에서만 실행
     steps:
       - name: Checkout repository  # 코드 체크아웃 추가
         uses: actions/checkout@v2
@@ -84,6 +88,7 @@ jobs:
   deploy_local:
     runs-on: self-hosted
     needs: build_and_deploy
+    if: github.ref == 'refs/heads/dev' # dev 브랜치에서만 실행
     steps:
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
