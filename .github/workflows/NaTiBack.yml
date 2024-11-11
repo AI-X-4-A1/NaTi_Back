@@ -104,4 +104,6 @@ jobs:
         shell: cmd
         run: |
           docker pull ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
+
           docker run -d -p 3000:3000 --name yaggugifrontapp ${{ secrets.DOCKER_USERNAME }}/yaggugifrontapp:latest
+
