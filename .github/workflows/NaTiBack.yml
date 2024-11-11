@@ -38,13 +38,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PPUDDING2 }}
         run: |
+          FEATURE_BRANCHES="${{ env.feature_branches }}"
           for branch in $FEATURE_BRANCHES; do
+            echo "Checking branch: $branch"
             git checkout dev
             git pull origin dev
             git checkout $branch
             git pull origin $branch
 
-            DIFF=$(git diff --name-only dev...$branch)
+            DIFF=$(git diff --name-only origin/dev...$branch)
             if [ -n "$DIFF" ]; then
               echo "Differences found between $branch and dev. Creating PR."
               gh pr create --base dev --head $branch --title "Auto merge $branch into dev" --body "자동 생성된 Pull Request" || echo "PR for $branch already exists."
@@ -59,6 +61,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.PPUDDING2 }}
         run: |
+          FEATURE_BRANCHES="${{ env.feature_branches }}"
           for branch in $FEATURE_BRANCHES; do
             PR_URL=$(gh pr view $branch --json url --jq '.url' || echo "")
             if [ -n "$PR_URL" ]; then
