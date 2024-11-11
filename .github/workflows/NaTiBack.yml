@@ -34,7 +34,7 @@ jobs:
 
       # 각 feature/** 브랜치에서 dev로 PR 생성
       - name: Create pull request from feature branches to dev
-        if: env.feature_branches != ""
+        if: ${{ env.feature_branches && env.feature_branches != '' }}
         env:
           GH_TOKEN: ${{ secrets.PPUDDING2 }}
         run: |
@@ -45,7 +45,7 @@ jobs:
 
       # PR 자동 병합 (dev 브랜치로)
       - name: Auto-merge pull requests into dev
-        if: env.feature_branches != ""
+        if: ${{ env.feature_branches && env.feature_branches != '' }}
         env:
           GH_TOKEN: ${{ secrets.PPUDDING2 }}
         run: |
