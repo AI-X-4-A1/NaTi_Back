@@ -20,8 +20,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
         with:
-        ref: dev              # dev 브랜치를 명시적으로 지정
-        fetch-depth: 0        # 전체 커밋 내역을 가져와서 기존 dev 브랜치로 체크아웃
+          ref: dev              # dev 브랜치를 명시적으로 지정
+          fetch-depth: 0        # 전체 커밋 내역을 가져와서 기존 dev 브랜치로 체크아웃
 
       # Git 설정
       - name: Configure Git
