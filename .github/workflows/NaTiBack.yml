@@ -1,8 +1,11 @@
 name: Auto Merge, Build, and Deploy to Docker Hub
 
 on:
+  push:
+    branches:
+      - main # main 브랜치에 푸시될 때도 워크플로 실행
   schedule:
-    - cron: '50 5 * * *' # 매일 오후 2시 50분 (한국 시간, UTC+9 기준)
+    - cron: '40 6 * * *' # 매일 오후 2시 50분 (한국 시간, UTC+9 기준)
   workflow_dispatch: # 수동 실행 가능
 
 permissions:
@@ -12,13 +15,11 @@ permissions:
 jobs:
   auto_merge_build_deploy:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/dev' # dev 브랜치에서만 실행
-    outputs:
-      has_new_commits: ${{ env.has_new_commits }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          ref: dev # 항상 dev 브랜치를 체크아웃
 
       # Git 설정
       - name: Configure Git
@@ -78,9 +79,9 @@ jobs:
               
               # 병합 완료 상태 확인
               STATUS=""
-              until [ "$STATUS" = "MERGED" ]; do
-                STATUS=$(gh pr view "$PR_URL" --json merged --jq '.merged' || echo "")
-                [ "$STATUS" = "true" ] && STATUS="MERGED" || sleep 5
+              until [ "$STATUS" != "" ]; do
+                STATUS=$(gh pr view "$PR_URL" --json mergedAt --jq '.mergedAt' || echo "")
+                [ "$STATUS" != "" ] || sleep 5
               done
               echo "Merge completed for $PR_URL."
             else
