@@ -73,7 +73,7 @@ jobs:
             PR_URL=$(gh pr list --base dev --head "$TARGET_BRANCH" --json url --jq '.[0].url' || echo "")
             if [ -n "$PR_URL" ]; then
               echo "Merging PR: $PR_URL"
-              gh pr merge "$PR_URL" --merge --auto || echo "Merge failed for $PR_URL."
+              gh pr merge "$PR_URL" --merge || echo "Merge failed for $PR_URL."
             else
               echo "No PR found for $TARGET_BRANCH to dev. Skipping merge."
             fi
