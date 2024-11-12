@@ -1,10 +1,10 @@
 {
-    "family": "narrativa1",
+    "family": "testest-task",
     "networkMode": "awsvpc",
     "containerDefinitions": [
       {
         "name": "yaggugi",
-        "image": "AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/narrativa1:latest",
+        "image": "AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/testest:latest",
         "essential": true,
         "portMappings": [
           {
