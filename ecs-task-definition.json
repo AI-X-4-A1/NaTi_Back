@@ -1,9 +1,9 @@
 {
-  "family": "testest-task",
+  "family": "tester-task1",
   "networkMode": "awsvpc",
   "containerDefinitions": [
     {
-      "name": "testest-container",  
+      "name": "tester-container",  
       "image": "AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/testest:latest",
       "essential": true,
       "portMappings": [
