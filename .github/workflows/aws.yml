@@ -43,6 +43,6 @@ jobs:
       - name: Register and Deploy ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          cluster: narrativa3
-          service: narrativa3
+          cluster: tester-cluster
+          service: tester-service1
           task-definition: ecs-task-definition.json
