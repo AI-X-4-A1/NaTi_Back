@@ -1,9 +1,9 @@
 {
-  "family": "tester-task1",
+  "family": "narrativa3",
   "networkMode": "awsvpc",
   "containerDefinitions": [
     {
-      "name": "tester-container",  
+      "name": "narrativa3",  
       "image": "AWS_ACCOUNT_ID.dkr.ecr.AWS_REGION.amazonaws.com/testest:latest",
       "essential": true,
       "portMappings": [
