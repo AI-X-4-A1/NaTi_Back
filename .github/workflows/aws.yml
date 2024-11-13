@@ -43,6 +43,7 @@ jobs:
       - name: Register and Deploy ECS task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
-          cluster: testest               # ECS 클러스터 이름
-          service: testest-service               # ECS 서비스 이름
+          cluster: testest
+          service: testest-service
           task-definition: ecs-task-definition.json
+          container-name: yaggugi  # 컨테이너 이름 설정
